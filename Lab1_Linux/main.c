@@ -48,34 +48,45 @@ void displayResult(int pid, int* massNum)
 		number *= 10;
 	}
 	number /= 10;
-	printf("Process %d result: %d\n", pid,number);
+	attron(COLOR_PAIR(getpid()%6 + 1));
+	printw("Process %d result: %d\n", pid,number);
 }
 
 int enterNumber()
 {
 	int number;
-	printf("Enter number of process: ");
+	printw("Enter number of process: ");
 	while (true)
 	{
 		fflush(stdin);
-		scanf("%d", &number);
-		if (number <= 0 || number >= 100) printf("Enter correct, not-null, less 100 number: ");
+		scanw("%d", &number);
+		if (number <= 0 || number >= 100) printw("Enter correct, not-null, less 100 number: ");
 		else break;
 	}
 	return number;
 }
 
-int main(int argc, char* argv[])
+void ncursesColorInitPairs()
+{	
+    init_pair(0, COLOR_WHITE, COLOR_BLACK);
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(4, COLOR_BLUE, COLOR_BLACK);
+    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(6, COLOR_CYAN, COLOR_BLACK);
+}
+
+void createProcess(int numberProc)
 {
 	int pid;
-	int numberProc = enterNumber();
 	for (int i = 0; i < numberProc; i++)
 	{
 		pid = fork();
 		if (pid == -1){
 			printw("Error creating child proc");
 			refresh();
-			return 0;
+			return;
 		}
 		if (pid == 0){
 			int number[9];
@@ -85,10 +96,23 @@ int main(int argc, char* argv[])
 			qsort(number,getArrayLength(number),sizeof(int),cmp);
 			writeToFile(path_out,number);
 			displayResult(getpid(),number);	
-			return 0;
+			return;
 		}else if(pid > 0){
 			//parent proc
 		}
 	}
+}
 
+int main(int argc, char* argv[])
+{
+	initscr();
+    start_color();
+    ncursesColorInitPairs();
+	attron(COLOR_PAIR(0));
+	int numberProc = enterNumber();
+	createProcess(numberProc);
+	refresh();
+	getch();
+	endwin();
+	return 0;
 }
