@@ -47,4 +47,3 @@ public:
 	string GetCurrentFolder();
 	void Format();
 };
-};
